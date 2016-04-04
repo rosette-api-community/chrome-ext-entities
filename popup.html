@@ -1,0 +1,59 @@
+<!doctype html>
+<!--This is a test comment-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+  <head>
+    <title>Results</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css" media="screen" />
+      <style>
+        .container {
+          /* avoid an excessively wide status text */
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 500px;
+          width: 400px;
+          height: 100%;
+        }
+        #status {
+          padding: 10px;
+        }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3">
+          <h3 class="text-center"><img src="images/RosetteAPI-Icon.png" width="36px" height="36px"></img> Rosette Text Analytics</h3>
+          <hr/>
+          <div id="stash" hidden></div>
+          <p class="bg-info" id="status"></p>
+          <hr/>
+          <div id="catStatus"></div>
+          <p id="catResult"></p>
+          <hr/>
+          <div id="entityStatus"></div>
+          <div>
+            <h4 class="text-danger">People</h4>
+            <ul id="pers"/>
+          </div>
+          <div>
+            <h4 class="text-info">Locations</h4>
+            <ul id="locs"/>
+          </div>
+          <div>
+            <h4 class="text-success">Organizations</h4>
+            <ul id="orgs"/>
+          </div>
+        </div>
+      </div>
+    
+    <hr>
+      <div class="row">
+        <div class="col-md-3 text-right">
+          <a href="options.html"><button type="button" class="btn btn-primary btn-xs">Enter API Key</button></a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+  <head>
+    <title>API Key</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css" media="screen" />
+    <style>
+      .container {
+        /* avoid an excessively wide status text */
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 500px;
+        width: 400px;
+        height: 100%;
+      }
+      #status {
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3">
+          <a href="popup.html"><button type="button" class="btn btn-primary btn-xs" id="close">Close</button></a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <hr>
+          <div class="form-group">
+            <label for="APIKey">Your Rosette API Key</label>
+            <input type="text" size="35" class="form-control" id="user-key" placeholder="Enter key">
+          </div>
+          <p>Don't have one? <a href="https://developer.rosette.com/signup" target="_blank">Get one</a></p>
+          <div id="status"></div>
+            <button type="submit" class="btn btn-default left" id="save">Save</button>
+            <div class="bg-success" id="save-message" style="visibility:hidden"></div>
+            <br />
+            <hr>
+          </div>
+        </div>
+      </div>
+    </body>
+    <script src="options.js"></script>
+</html>
