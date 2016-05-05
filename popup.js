@@ -1,6 +1,5 @@
-
+var Api = require('rosette-api').Api;
 var requests = []; // queue for XMLHttpRequests to avoid 429 errors from Rosette API
-
 /**
  * Get the current URL.
  *
@@ -54,55 +53,35 @@ function renderStatus(statusText) {
 // use Rosette API to get classification of either an entire webpage or of highlighted text
 // within that webpage
 function getClassification(url, selectedText, callback, errorCallback) {
-  var JSONtext; // set text to send to Rosette API
-  if (selectedText == "") {
-    JSONtext = "{\"contentUri\": \"" + url + "\"}";
-  } else {
-    JSONtext = "{\"content\": " + JSON.stringify(selectedText) + "}";
-  }
 
   // check for developer key and send requests to Rosette API
   chrome.storage.local.get('rosetteKey', function (result) {
+
     if (result.rosetteKey == null) {
       renderStatus('Please enter an API key');
       document.getElementsByClassName("bg-info")[0].style.backgroundColor = "#FFCCCC"; // make status box red
     } else {
-      var xmlhttp = new XMLHttpRequest();
-      var searchUrl = "https://api.rosette.com/rest/v1/categories";
-      xmlhttp.open("POST", searchUrl, true);
-      xmlhttp.setRequestHeader ("X-RosetteAPI-Key", result.rosetteKey);
-      xmlhttp.setRequestHeader ("Accept", "application/json");
-      xmlhttp.setRequestHeader ("Content-Type", "application/json");
-      xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          var JSONresponse = JSON.parse(this.responseText);
-          callback(JSONresponse.categories[0].label);
+      var JSONtext; // set text to send to Rosette API
+
+      // create api object and set endpoint
+      var apiClass = new Api(result.rosetteKey, 'https://api.rosette.com/rest/v1/');
+      var endpoint = "categories";
+
+      if (selectedText == "") {
+        apiClass.parameters.contentUri = url;
+      } else {
+        apiClass.parameters.content = JSON.stringify(selectedText);
+
+      }
+      // call categories endpoint on rosette Api
+      apiClass.rosette(endpoint, function(err, res){
+        if(err){
+          errorCallback(err);
         } else {
-          errorCallback('');
+          callback(res.categories[0].label);
         }
-      }
-      xmlhttp.onerror = function() {
-        errorCallback('Network error.');
-      };
-      xmlhttp.input = JSONtext;
-      // Have the completion of each request trigger the sending of the next one
-      // This prevents Rosette API error 429 (Too Many Requests) by only ever letting the extension send one request at a time
-      // The onload method is called when the XMLHttpRequest receives any response, even if that response is another
-      // Rosette API error, such as 415 (Unsupported Language)
-      xmlhttp.onload = function () {
-          requests.shift();
-          if (requests.length > 0) {
-              requests[0].send(requests[0].input);
-          } else {
-              requests.shift();
-          }
-      }
-      requests.push(xmlhttp);
-      
-      // send first request, which will trigger the rest through the onload method
-      if (requests.length == 1) {
-        requests[0].send(requests[0].input);
-      }
+      });
+
     }
   });
 }
@@ -110,51 +89,32 @@ function getClassification(url, selectedText, callback, errorCallback) {
 // use Rosette API to get retrieve all entities (people, locations, and organizations)
 // from either an entire webpage or from text highlighted by the user
 function getEntities(url, selectedText, callback, errorCallback) {
-  var JSONtext; // set text to send to Rosette API
-  if (selectedText == "") {
-    JSONtext = "{\"contentUri\": \"" + url + "\"}";
-  } else {
-    JSONtext = "{\"content\": " + JSON.stringify(selectedText) + "}";
-  }
    
   // check for developer key and send requests to Rosette API
   chrome.storage.local.get('rosetteKey', function (result) {
     if (result.rosetteKey == null) {
       renderStatus('Please enter an API key');
     } else {
-      var xmlhttp = new XMLHttpRequest();
-      var searchUrl = "https://api.rosette.com/rest/v1/entities";
-      xmlhttp.open("POST", searchUrl, true);
-      xmlhttp.setRequestHeader ("X-RosetteAPI-Key", result.rosetteKey);
-      xmlhttp.setRequestHeader ("Accept", "application/json");
-      xmlhttp.setRequestHeader ("Content-Type", "application/json");
-      xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          var JSONresponse = JSON.parse(this.responseText);
-          callback(JSONresponse.entities);
-        } else {
-          errorCallback('');
-        }
-      }
-      xmlhttp.input = JSONtext;
-      // Have the completion of each request trigger the sending of the next one
-      // This prevents Rosette API error 429 (Too Many Requests) by only ever letting the extension send one request at a time
-      // The onload method is called when the XMLHttpRequest receives any response, even if that response is another
-      // Rosette API error, such as 415 (Unsupported Language)
-      xmlhttp.onload = function () {
-          requests.shift();
-          if (requests.length > 0) {
-              requests[0].send(requests[0].input);
-          } else {
-              requests.shift();
-          }
-      }
-      requests.push(xmlhttp);
+ var JSONtext; // set text to send to Rosette API
 
-      // send first request, which will trigger the rest through the onload method
-      if (requests.length == 1) {
-          requests[0].send(requests[0].input);
+      // create api object and set endpoint
+      var apiClass = new Api(result.rosetteKey, 'https://api.rosette.com/rest/v1/');
+      var endpoint = "entities";
+
+      if (selectedText == "") {
+        apiClass.parameters.contentUri = url;
+      } else {
+        apiClass.parameters.content = JSON.stringify(selectedText);
+
       }
+      // call categories endpoint on rosette Api
+      apiClass.rosette(endpoint, function(err, res){
+        if(err){
+          errorCallback(err);
+        } else {
+          callback(res.entities);
+        }
+      });
     }
   });
 }

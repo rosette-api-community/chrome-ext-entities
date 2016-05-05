@@ -1,0 +1,25 @@
+{
+  "name": "chrome-ext-entities",
+  "version": "1.0.0",
+  "description": "\"Rosette Text Analytics Power Pack Extensions - Entity Extraction and Categorization.\"",
+  "main": "popup.js",
+  "scripts": {
+    "build": "browserify popup.js -o bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosette-api-community/chrome-ext-entities.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/rosette-api-community/chrome-ext-entities/issues"
+  },
+  "homepage": "https://github.com/rosette-api-community/chrome-ext-entities#readme",
+  "devDependencies": {
+    "browserify": "^13.0.0"
+  },
+  "dependencies": {
+    "rosette-api": "^1.1.0"
+  }
+}
