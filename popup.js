@@ -1,4 +1,4 @@
-var Api = require('rosette-api').Api;
+var Api = require('rosette-api');
 var requests = []; // queue for XMLHttpRequests to avoid 429 errors from Rosette API
 /**
  * Get the current URL.
@@ -66,6 +66,10 @@ function getClassification(url, selectedText, callback, errorCallback) {
       // create api object and set endpoint
       var apiClass = new Api(result.rosetteKey, 'https://api.rosette.com/rest/v1/');
       var endpoint = "categories";
+      var appHeader = [];
+      appHeader[0] = "X-RosetteAPI-App"
+      appHeader[1] = "chrome-extension-categories";
+      apiClass.parameters.customHeaders = [appHeader];
 
       if (selectedText == "") {
         apiClass.parameters.contentUri = url;
@@ -100,6 +104,10 @@ function getEntities(url, selectedText, callback, errorCallback) {
       // create api object and set endpoint
       var apiClass = new Api(result.rosetteKey, 'https://api.rosette.com/rest/v1/');
       var endpoint = "entities";
+      var appHeader = [];
+      appHeader[0] = "X-RosetteAPI-App"
+      appHeader[1] = "chrome-extension-entities";
+      apiClass.parameters.customHeaders = [appHeader];
 
       if (selectedText == "") {
         apiClass.parameters.contentUri = url;

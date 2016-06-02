@@ -14273,11 +14273,9 @@ function extend() {
 }
 
 },{}],58:[function(require,module,exports){
-module.exports.Api = require('./lib/Api');
+module.exports = require('./lib/Api');
 
 module.exports.categories = require('./lib/categories');
-
-module.exports.checkVersion = require('./lib/checkVersion');
 
 module.exports.entities = require("./lib/entities");
 
@@ -14306,7 +14304,7 @@ module.exports.tokens = require("./lib/tokens");
 module.exports.translatedName = require("./lib/nameTranslation");
 
 
-},{"./lib/Api":59,"./lib/categories":60,"./lib/checkVersion":61,"./lib/entities":62,"./lib/info":63,"./lib/morphology":65,"./lib/nameSimilarity":66,"./lib/nameTranslation":67,"./lib/parameters":68,"./lib/ping":69,"./lib/relationships":70,"./lib/rosetteConstants":71,"./lib/rosetteExceptions":72,"./lib/sentences":74,"./lib/sentiment":75,"./lib/tokens":76}],59:[function(require,module,exports){
+},{"./lib/Api":59,"./lib/categories":60,"./lib/entities":61,"./lib/info":62,"./lib/morphology":64,"./lib/nameSimilarity":65,"./lib/nameTranslation":66,"./lib/parameters":67,"./lib/ping":68,"./lib/relationships":69,"./lib/rosetteConstants":70,"./lib/rosetteExceptions":71,"./lib/sentences":73,"./lib/sentiment":74,"./lib/tokens":75}],59:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14338,14 +14336,13 @@ var sentences = require("./sentences");
 var language = require("./language");
 var ping = require("./ping");
 var info = require("./info");
-var checkVersion = require("./checkVersion");
 
 /**
  * Compatible server version.
  *
  * @type string
  */
-var BINDING_VERSION = "1.1";
+var BINDING_VERSION = "1.1.4";
 
 /**
  * @class
@@ -14387,8 +14384,6 @@ function Api(userKey, serviceURL) {
         this.serviceURL = "https://api.rosette.com/rest/v1/";
     }
 
-    this.versionChecked = false;
-
 };
 
 /**
@@ -14401,33 +14396,20 @@ Api.prototype.rosette = function(endpoint, callback) {
     var api = this;
     endpoint = require("./" + endpoint);
     var e = new endpoint();
-    var c = new checkVersion();
-
-    // check if server and client API versions match
-    c.check(api.parameters, this.userKey, this.serviceURL, function(err, res) {
-        if (err) {
-            return callback(err);
-        } else if (!res.versionChecked) {
-            return callback(new RosetteException("incompatibleVersion", "The server version is not compatible with binding version " + BINDING_VERSION, res.Version));
-        } else {
-            // mark api binding version as checked
-            api.versionChecked = true;
 
             // send parameters to the specified endpoint
-            e.getResults(api.parameters, api.userKey, api.serviceURL, function(err, res) {
-                if (err) {
-                    return callback(err);
-                } else {
-                    return callback(null, res);
-                }
-            });
+    e.getResults(api.parameters, api.userKey, api.serviceURL, function(err, res) {
+        if (err) {
+            return callback(err);
+        } else {
+            return callback(null, res);
         }
     });
 };
 
 module.exports = Api;
 
-},{"./categories":60,"./checkVersion":61,"./entities":62,"./info":63,"./language":64,"./morphology":65,"./nameSimilarity":66,"./nameTranslation":67,"./parameters":68,"./ping":69,"./relationships":70,"./rosetteConstants":71,"./rosetteExceptions":72,"./sentences":74,"./sentiment":75,"./tokens":76}],60:[function(require,module,exports){
+},{"./categories":60,"./entities":61,"./info":62,"./language":63,"./morphology":64,"./nameSimilarity":65,"./nameTranslation":66,"./parameters":67,"./ping":68,"./relationships":69,"./rosetteConstants":70,"./rosetteExceptions":71,"./sentences":73,"./sentiment":74,"./tokens":75}],60:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14489,56 +14471,7 @@ categories.prototype.getResults = function(parameters, userKey, serviceURL, call
 
 module.exports = categories;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],61:[function(require,module,exports){
-/**
- * Rosette API.
- *
- * @copyright 2014-2015 Basis Technology Corporation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * @license http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
- **/
-"use strict";
-
-var URL = require("url");
-
-var rosetteConstants = require("./rosetteConstants");
-var RosetteException = require("./rosetteExceptions");
-var rosetteRequest = require("./rosetteRequest");
-
-/**
- * @class
- *
- * @copyright 2014-2015 Basis Technology Corporation.
- * @license http://www.apache.org/licenses/LICENSE-2.0
- */
-function checkVersion() {
-
-};
-
-/**
- * Makes an HTTP request to the specified Rosette API endpoint and returns the result
- * @param {string} userKey - The Rosette API user access key
- * @param {string} serviceURL - The base service URL to be used to access the Rosette API
- * @param {function} callback - Callback function to be exectuted after the function to which it is passed is complete
- */
-checkVersion.prototype.check = function(parameters, userKey, serviceURL, callback) {
-    var req = new rosetteRequest();
-    // configure URL
-    var urlParts = URL.parse(serviceURL + "info?clientVersion=" + req.bindingVersion());
-
-    req.makeRequest('POST', userKey, urlParts, parameters, callback);
-
-};
-
-module.exports = checkVersion;
-
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],62:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],61:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14581,10 +14514,10 @@ entities.prototype.getResults = function(parameters, userKey, serviceURL, callba
 
     if (parameters.loadParams().documentFile != null) {
         if (parameters.loadParams().linked == true) {
-                parameters.loadFile(parameters.loadParams().documentFile, parameters, userKey, serviceURL, "entities/linked", callback);
-            } else {
-                parameters.loadFile(parameters.loadParams().documentFile, parameters, userKey, serviceURL, "entities", callback);
-            }
+            parameters.loadFile(parameters.loadParams().documentFile, parameters, userKey, serviceURL, "entities/linked", callback);
+        } else {
+            parameters.loadFile(parameters.loadParams().documentFile, parameters, userKey, serviceURL, "entities", callback);
+        }
         
     } else {
 
@@ -14609,7 +14542,7 @@ entities.prototype.getResults = function(parameters, userKey, serviceURL, callba
 
 module.exports = entities;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],63:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],62:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14658,7 +14591,7 @@ info.prototype.getResults = function(parameters, userKey, serviceURL, callback) 
 
 module.exports = info;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],64:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],63:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14720,7 +14653,7 @@ language.prototype.getResults = function(parameters, userKey, serviceURL, callba
 
 module.exports = language;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],65:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],64:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14784,7 +14717,7 @@ morphology.prototype.getResults = function(parameters, userKey, serviceURL, call
 
 module.exports = morphology;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],66:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],65:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14831,7 +14764,7 @@ nameSimilarity.prototype.getResults = function(parameters, userKey, serviceURL, 
 
         // validate parameters
         if (parameters.loadParams().name1 == null || parameters.loadParams().name2 == null) {
-            return callback( new RosetteException("badArgument", "Must supply both name1 and name2 parameters to be matched."));
+            return callback(new RosetteException("badArgument", "Must supply both name1 and name2 parameters to be matched."));
         } else {
             // configure URL
             var urlParts = URL.parse(serviceURL + "name-similarity");
@@ -14844,7 +14777,7 @@ nameSimilarity.prototype.getResults = function(parameters, userKey, serviceURL, 
 
 module.exports = nameSimilarity;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],67:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],66:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -14906,7 +14839,7 @@ nameTranslation.prototype.getResults = function(parameters, userKey, serviceURL,
 
 module.exports = nameTranslation;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],68:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],67:[function(require,module,exports){
 (function (Buffer){
 /**
  * Rosette API.
@@ -14983,6 +14916,9 @@ function parameters() {
     //morphology
     this.morphology = null;
 
+    //custom headers
+    this.customHeaders = null;
+
 }
 
 /**
@@ -15008,17 +14944,17 @@ parameters.prototype.loadParams = function() {
         "targetScript": this.targetScript,
         "targetScheme": this.targetScheme,
         "options": this.options,
-        "accuracyMode": this.accuracyMode,
         "linked": this.linked,
         "explain": this.explain,
         "short-string": this.shortString,
         "morphology": this.morphology,
         "_maxRetries": this.maxRetries,
-        "_msInterval": this.msInterval
+        "_msInterval": this.msInterval,
+        "customHeaders": this.customHeaders
     };
 
     for (var key in paramJSON) {
-    if (key.substring(0, 1) !== '_' && paramJSON[key] != null) {
+        if (key.substring(0, 1) !== '_' && paramJSON[key] != null && key != "customHeaders") {
             tempJSON[key] = paramJSON[key];
         }
     }
@@ -15065,7 +15001,9 @@ parameters.prototype.loadFile = function(filePath, loadedParameters, userKey, se
             "accept": 'application/json',
             "accept-encoding": "gzip",
             "content-type": 'multipart/mixed',
-            "user-agent": "rosetteapinode/" + BINDING_VERSION
+            "user-agent": "rosetteapinode/" + BINDING_VERSION, 
+            "X-RosetteAPI-Binding": "nodejs",
+            "X-RosetteAPI-Binding-Version": BINDING_VERSION
         }
         headers["X-RosetteAPI-Key"] = userKey;
 
@@ -15126,7 +15064,7 @@ parameters.prototype.loadFile = function(filePath, loadedParameters, userKey, se
 module.exports = parameters;
 
 }).call(this,require("buffer").Buffer)
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"buffer":17,"fs":1,"http":46,"https":22,"multipart-stream":77,"path":25,"url":53,"zlib":16}],69:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"buffer":17,"fs":1,"http":46,"https":22,"multipart-stream":76,"path":25,"url":53,"zlib":16}],68:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -15175,7 +15113,7 @@ ping.prototype.getResults = function(parameters, userKey, serviceURL, callback) 
 
 module.exports = ping;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],70:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],69:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -15221,10 +15159,10 @@ relationships.prototype.getResults = function(parameters, userKey, serviceURL, c
     } else {
 
         // validate parameters
-        if (parameters.loadParams().accuracyMode != undefined) {
-            if (parameters.loadParams().accuracyMode.toUpperCase() != "PRECISION" && parameters.loadParams().accuracyMode.toUpperCase() != "RECALL") {
-                return callback(new RosetteException("badArgument", "Accuracy mode parameter must be set to either PRECISION or RECALL"));
-            }
+        if (parameters.loadParams().content == null && parameters.loadParams().contentUri == null) {
+            return callback(new RosetteException("badArgument", "Must supply one of Content or ContentUri", "bad arguments"));
+        } else if (parameters.loadParams().content != null && parameters.loadParams().contentUri != null) {
+            return callback(new RosetteException("badArgument", "Cannot supply both Content and ContentUri", "bad arguments"));
         }
 
         // configure URL
@@ -15237,7 +15175,7 @@ relationships.prototype.getResults = function(parameters, userKey, serviceURL, c
 
 module.exports = relationships;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],71:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],70:[function(require,module,exports){
 /**
  * Container for the Rosette Constants.
  *
@@ -15281,7 +15219,7 @@ var morphologyOutput = {
 exports.dataFormat = dataFormat;
 exports.morpholoyOutput = morphologyOutput;
 
-},{}],72:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 /**
  * RosetteException.
  *
@@ -15321,7 +15259,8 @@ util.inherits(RosetteException, Error);
 
 //Export the constructor function as the export of this module file.
 module.exports = RosetteException;
-},{"util":56}],73:[function(require,module,exports){
+
+},{"util":56}],72:[function(require,module,exports){
 (function (Buffer){
 /**
  * Rosette API.
@@ -15351,7 +15290,7 @@ var RosetteException = require("./rosetteExceptions");
  *
  * @type string
  */
-var BINDING_VERSION = "1.1";
+var BINDING_VERSION = "1.1.4";
 
 /**
  * @class
@@ -15392,12 +15331,20 @@ rosetteRequest.prototype.makeRequest = function(requestType, userKey, urlParts, 
         "accept": "application/json",
         "accept-encoding": "gzip",
         "content-type": "application/json",
-        "user-agent": "rosetteapinode/" + BINDING_VERSION
+        "user-agent": "rosetteapinode/" + BINDING_VERSION,
+        "X-RosetteAPI-Binding": "nodejs",
+        "X-RosetteAPI-Binding-Version": BINDING_VERSION
     }
     if (userKey != null) {
         headers["X-RosetteAPI-Key"] = userKey;
     }
 
+    if(parameters.customHeaders != null){
+        parameters.customHeaders.forEach( function(element, index) {
+            headers[element[0]] = element[1];
+        });
+
+    }
 
     var options = {
         hostname: urlParts.hostname,
@@ -15465,7 +15412,7 @@ rosetteRequest.prototype.makeRequest = function(requestType, userKey, urlParts, 
 module.exports = rosetteRequest;
 
 }).call(this,require("buffer").Buffer)
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"buffer":17,"http":46,"https":22,"url":53,"zlib":16}],74:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"buffer":17,"http":46,"https":22,"url":53,"zlib":16}],73:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -15527,7 +15474,7 @@ sentences.prototype.getResults = function(parameters, userKey, serviceURL, callb
 
 module.exports = sentences;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],75:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],74:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -15589,7 +15536,7 @@ sentiment.prototype.getResults = function(parameters, userKey, serviceURL, callb
 
 module.exports = sentiment;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],76:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],75:[function(require,module,exports){
 /**
  * Rosette API.
  *
@@ -15651,7 +15598,7 @@ tokens.prototype.getResults = function(parameters, userKey, serviceURL, callback
 
 module.exports = tokens;
 
-},{"./rosetteConstants":71,"./rosetteExceptions":72,"./rosetteRequest":73,"url":53}],77:[function(require,module,exports){
+},{"./rosetteConstants":70,"./rosetteExceptions":71,"./rosetteRequest":72,"url":53}],76:[function(require,module,exports){
 var Sandwich = require('sandwich-stream').SandwichStream
 var stream = require('stream')
 var inherits = require('inherits')
@@ -15716,9 +15663,9 @@ Multipart.prototype.addPart = function(part) {
 	this._add(partStream)
 }
 
-},{"inherits":78,"is-stream":79,"sandwich-stream":80,"stream":45}],78:[function(require,module,exports){
+},{"inherits":77,"is-stream":78,"sandwich-stream":79,"stream":45}],77:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],79:[function(require,module,exports){
+},{"dup":23}],78:[function(require,module,exports){
 'use strict';
 
 var isStream = module.exports = function (stream) {
@@ -15741,7 +15688,7 @@ isStream.transform = function (stream) {
 	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
 };
 
-},{}],80:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 var Readable = require('stream').Readable;
 var PassThrough = require('stream').PassThrough;
 
@@ -15849,8 +15796,8 @@ sandwichStream.SandwichStream = SandwichStream;
 
 module.exports = sandwichStream;
 
-},{"stream":45}],81:[function(require,module,exports){
-var Api = require('rosette-api').Api;
+},{"stream":45}],80:[function(require,module,exports){
+var Api = require('rosette-api');
 var requests = []; // queue for XMLHttpRequests to avoid 429 errors from Rosette API
 /**
  * Get the current URL.
@@ -15918,6 +15865,10 @@ function getClassification(url, selectedText, callback, errorCallback) {
       // create api object and set endpoint
       var apiClass = new Api(result.rosetteKey, 'https://api.rosette.com/rest/v1/');
       var endpoint = "categories";
+      var appHeader = [];
+      appHeader[0] = "X-RosetteAPI-App"
+      appHeader[1] = "chrome-extension-categories";
+      apiClass.parameters.customHeaders = [appHeader];
 
       if (selectedText == "") {
         apiClass.parameters.contentUri = url;
@@ -15952,6 +15903,10 @@ function getEntities(url, selectedText, callback, errorCallback) {
       // create api object and set endpoint
       var apiClass = new Api(result.rosetteKey, 'https://api.rosette.com/rest/v1/');
       var endpoint = "entities";
+      var appHeader = [];
+      appHeader[0] = "X-RosetteAPI-App"
+      appHeader[1] = "chrome-extension-entities";
+      apiClass.parameters.customHeaders = [appHeader];
 
       if (selectedText == "") {
         apiClass.parameters.contentUri = url;
@@ -16038,4 +15993,4 @@ document.addEventListener('DOMContentLoaded', function() {
 // NOTE: The content_fb.js file in the chrome-ext-Sentiment repo contains
 // the most elegant structure for sending non-concurrent XMLHttpRequests (to avoid 429 errors)
 // out of all the Chrome extension examples.
-},{"rosette-api":58}]},{},[81]);
+},{"rosette-api":58}]},{},[80]);
